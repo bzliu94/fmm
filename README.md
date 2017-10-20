@@ -2,8 +2,6 @@
 
 Fast matrix multiplication.
 
-## sqtrmm
-
-Softly-quadratic-time real matrix multiplication.
+Boolean MM, real (floating-point) MM, real (rational) MM, assorted real (floating-point) semi-ring flavors for MM in softly quadratic time.
 
 
