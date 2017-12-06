@@ -6,4 +6,6 @@ Boolean MM, real (floating-point) MM, real (rational) MM, assorted real (floatin
 
 <img src="https://github.com/bzliu94/fmm/blob/master/times.png" alt="times">
 
+<img src="https://github.com/bzliu94/fmm/blob/master/times2.png" alt="times2">
+
 
