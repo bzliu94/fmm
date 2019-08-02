@@ -1,0 +1,22 @@
+2019-08-01
+
+Postmortem #3
+
+We came across some ideas that we have found flaws with.
+
+1. We use 2-edge-connectivity. Have problems with pollution (n.b. look below for explanation).
+
+2. We use 2-vertex-connectivity. Presumably it is more powerful than 2ECB, given that it is harder to implement a 2VCB oracle than a 2ECB oracle. Have problem with pollution. What is pollution? We have R nodes for A matrix rows, L nodes for B matrix columns, M nodes for each offset in an A row or B column (i.e. or for each "color"). The graph is directed. Edges exist if an A row or B column has a one bit for some color. Pollution is s.t. if we start at an R node, have a target L node, we reach a different L node, visit a different R node, then visit the desired L node. This behavior spoils the usefulness of the result for our application, which is lax Boolean MM (i.e. inputs are matrices with elements in {0, 1}, operators used are OR and AND, output results are in {0, 1}. This is in contrast to strict Boolean MM, where inputs are matrices with elements in {0, 1}, operators used are + and *, output results are in integers. We may wish to duplicate this basic graph, or we may wish to use a filler layer involving a "beta node" to help with having two vertex-disjoint paths for each direction for a pair of query nodes when the output should be a one bit for a pair of A row and B column, or we may wish to do both. Additionally, we may wish to clone M and L nodes s.t. if we change the R node they are meant for, we are talking about a different M or L node. However, this approach likely would require time cubic in n. We are unable to arrive at a suitable graph that is both cheap enough to build and does not suffer from pollution-related effects. The beta node we can call a "guard". Problem with a guard is that to have it exclude a path, we must first go down it, which means we may have a wrap-around, which is related to pollution. Part of definition of a path is that we are not allowed to visit a node and then back-track and still be able to count that node as visited. Also, visiting a guard is not an action that can cause other different nodes to be un-visitable. If we have many ingoing paths for a guard, when we exit the guard, we may lose information about which ingoing path we took to get to that guard, which for our application means that we e.g. do not necessarily know what R node (and thus A row) we intend to single out. We note that we use the term guard not as it is meant for computational geometry.
+
+References
+
+* Georgiadis et al. - 2-vertex connectivity in directed graphs (2018)
+* Georgiadis et al. - 2-edge connectivity in directed graphs (2016)
+* Fraczak et al. - Finding dominators via disjoint set union (2013)
+* Fraczak et al. - Corrections to "Finding dominators via disjoint set union" (2014)
+* Tarjan - Edge-disjoint spanning trees and depth-first search (1976)
+* Gabow and Tarjan - A linear-time algorithm for a special case of disjoint set union (1985)
+
+--
+
+
