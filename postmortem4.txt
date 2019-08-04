@@ -1,0 +1,26 @@
+2019-08-02
+
+Postmortem #4
+
+We came across an idea that ended up being less attractive than it initially seemed.
+
+1. While we will not say it is impossible to perform faster GH-tree construction based on our specific application graph, we will say that it is harder than we expected; when we pull out singletons from an iteration of GH-tree construction, we do not necessarily leave them alone. We have to re-combine based on undirected (i.e. standard) connectivity and based on the supernode in the current coarsely-refined tree that we wish to break apart. Also, the graph we propose for our application has O(n) R nodes, O(n ^ 2) M nodes, O(n ^ 2) L nodes and O(n ^ 2) R-M edges and O(n ^ 3) M-L edges. This is so that we can have undirectedness (i.e. no pollution between different R nodes) and thus a GH-tree does exist for it; this is at the expense of having too many edges to handle in a standard way; we imagine that we can benefit from choosing which pair of nodes to treat as seeds for current iteration. For this reason, we early on decide not to use Gusfield version of GH-tree construction; we do not have as much freedom to choose seeds. We note that this graph has essentially at least n islands that are mutually not connected; they each have O(n ^ 2) edges. Presumably, we have O(n * polylog(n)) time available for each island. In the end, we decide against pursuing GH-tree construction mainly because of needing to be able to choose seeds and the fact that contraction can involve re-grouping and visiting nodes that have already been pulled out into singleton supernodes. The problem is not just about re-combining. Specifically, we have coalescing s.t. when we choose a supernode to break apart we may for nodes outside of it re-group s.t. we further combine. As an aside, we have un-coalescing s.t. when we choose a supernode to break apart we may for nodes outside of it break apart. The effect is that it is difficult to require amount of work for each iteration less than linear in number of features in original input graph; i.e. we perform operations for each iteration that are not restricted to nodes inside the current supernode we plan on breaking apart and, though we do not rule out existence of a possible workaround, it currently appears that this detail means we spend too much time. This means that, given that we have O(n ^ 2) nodes and O(n ^ 3) edges, that our attempts tend to still require at least O(n ^ 2 * n) = O(n ^ 3) time. This is not a complete refutation of the GH-tree approach for the lax Boolean MM application; we decide to treat this as a sunk cost and move on to better ways to spend our time.
+
+Miscellany:
+
+1. Genus is not a synonym for dimension; it's related to topology. We care because we are interested in performing certain min. cut subproblems for GH-tree construction efficiently.
+
+2. If we could get efficient lax Boolean MM solved, we next have to tackle floating-point MM; if we acknowledge that we then need to incorporate word-packing, we can go from reducing to m ^ 2 strict Boolean MM instances to m * log(m) strict Boolean MM instances via FFT (i.e. via number-theoretic transform, possibly). By word-packing, the idea is that we can divide time required by m'; m is number of bits in a floating-point number and m' is size of a word). We have a hunch that we can take advantage of energy conservation in an attempt to avoid space requirement inflation and go back from frequency domain to time domain via dividing by a scalar via Parseval's theorem. If we have for strict Boolean MM also ability to exploit sparsity maximally, then we can tile subproblems based on significand offset. We may be able to make progress on word-packing if we are able to use a flow approach s.t. we use fat nodes and we have a saturating property s.t. we have side-by-side problems and the number of fat nodes we use does not change at worst. Also, a problem that remains is numerical robustness; one way to avoid catastrophic cancellation is to make sure we add or subtract numbers with greatest magnitudes first, though it is not clear for our application what the best way of doing this s.t. it is efficient would be.
+
+3. As part of FastVRB-based approach, one extra detail that seems novel we would like to mention is one that takes advantage of fact that each output vertex-resilient block overlaps another vertex-resilient block via one node at most. This means if we do intra-block pairs they are combinations of two items that are never seen being generated from other VRB's. This means that we an avoid being bottleneck as query side of algorithm (as opposed to for graph generation for earlier part of algorithm) for our attempt to exploit sparsity.
+
+References
+
+* Gomory and Hu - Multi-terminal network flows (1961)
+* Cheng et al. - Tree structures and algorithms for physical design (2018)
+* Mozes et al. - Minimum cut of directed planar graphs in O(n * log(log(n))) time (2016)
+* Gusfield - Very simple methods for all pairs network flow analysis (1990)
+
+--
+
+
