@@ -1,0 +1,15 @@
+2019-08-14
+
+Postmortem #5
+
+We came across an article that seemed promising, but that is not appropriate for lax Boolean MM.
+
+1. Article by Wu and Zhang in 2015 on flow-equivalent tree for directed graph seemed promising until we realized that their directed graph satisfies the requirement that the purpose is to determine all-pairs edge connectivity s.t. edge connectivity is symmetric for directed graph; edge connectivity lambda(u, v) is min(f(u, v), f(v, u)). For application of lax Boolean MM, we cannot afford to have symmetric flow, because doing so requires that we change our graph s.t. we have wrap-around and then have interference or "pollution". Instead, we are interested in asymmetric edge connectivity. So, we cannot use their approach. The idea is that perhaps we could have sped their approach up by considering application-specific details like spending O(n) time to find an s-t max. flow instead of O(m) time, where n is number of nodes and m is number of edges.
+
+References
+
+* Wu and Zhang - Efficient algorithm for computing all low s-t edge connectivities in directed graphs (2015)
+
+--
+
+
