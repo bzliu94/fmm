@@ -1,0 +1,27 @@
+2019-09-17
+
+Postmortem #7
+
+APPROACH #1
+
+We attempt to speed up lax Boolean matrix multiplication by framing it using Davoodi et al. 2012 concentric circles and approximate range diameter query. But, being loose, we are unable to make the time s.t. power for polylog term is bounded by a constant. Alternatively, we cannot make the power of n better than 2.5. We were motivated by a time estimate that ultimately proved wrong because we used one of two logarithm identities that we assumed existed but that do not. The following are not true: (1) log_2(x) + 1 / log_2(y) = log_2(x / y); (2) log_2(x) / log_2(y) = log_2(x / y).
+
+The novelty of the idea is that we use approximate range diameter query to get same effect as exact range diameter query by re-spacing the points in our point arrangement. We must make sure points on a circle are far away enough from points on adjacent smaller circle. Then, we must make sure a point on a circle is far enough from adjacent point on same circle -- this we refer to as chord case. The problem with this case is that no matter how we re-space circles, the ratio stays the same. The only way to make the ratio larger is to reduce n or reduce effective n; the latter we do by increasing the dimension from two to some value that is higher; our intuition tells us that in higher dimensions, a single hyper-octant of a hypersphere has more angle to share among points from circles. We also note that the relevant approx. range diameter query implementations come from Gupta et al. 2008, Nekrich/Smid 2010, Oh/Ahn 2018. The planar case is easier to implement and we get better error relationship (i.e. via coefficient of 1 / sqrt(delta) instead of e.g. 1 / delta) via Gupta et al. 2008 than Oh/Ahn 2018. Nekrich/Smid 2010 give support for higher dimensions as does Oh/Ahn 2018. Nekrich/Smid 2010 is more vague than Oh/Ahn 2018. The idea is that with higher dimension, some delta can be larger (and thus less costly -- i.e and thus does not grow time as much via this avenue), but higher dimension also affects time adversely. We note that we did not get to the point of figuring out just how quickly delta can grow as we increase dimension; we assumed as a first guess that log_b(n) + 1 = d and that delta = 1 / b, where b is number of points for some planar cross-section at worst, d is dimension (e.g. for plane d == 2), n is number of colors (i.e. columns in A or rows in B). The approximate range diameter query requires that we return a point pair that is proportion at worst (1 - delta) fraction of actual farthest distance between two points in a range. Note that we will not ever have fraction larger than one (at least via Gupta et al. 2008), because it is clear when two points are not even in the range.
+
+It's worth noting that we when considering higher dimensions (i.e. d >= 3), packing constant can be ignored. This is especially the case if we want to prefer planar case; for higher dimensions, packing constant can be assumed to be < 1, which makes higher-dimensional approaches strictly more inefficient than we predict using a first pass numerically.
+
+There are numerical robustness issues that we had aimed to tackle by ensuring some given n is red-flagged if associated smallest f.p. value we ever plan to come across and largest f.p. value we ever plan to come across can be summed s.t. their significands (or significant digits) can all exist in one word for an f.p. value. Then, a distance is off by at most twice the error we allow for an individual f.p. value. This all must be weighed relative to delta we choose.
+
+It's too bad that the approach is not fast enough, because it would have been quite clever.
+
+--
+
+References
+* Gupta et al. - Data structures for range-aggregate extent queries (2008)
+* Davoodi et al. - Two-dimensional range diameter queries (2012)
+* Nekrich and Smid - Approximating range-aggregate queries using coresets (2010)
+* Oh and Ahn - Approximate range queries for clustering (2018)
+
+--
+
+
