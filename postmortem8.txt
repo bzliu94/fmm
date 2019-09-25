@@ -1,0 +1,34 @@
+2019-09-24
+
+Postmortem #8
+
+APPROACH #1
+
+We attempt to speed up lax Boolean matrix multiplication by reducing it to 3-d (1 + epsilon)-approximate hyperrectangle range diameter query. We use concept of staircase pair from Kaplan et al. 2008. As an aside, if we arrange the two staircases s.t. one is in quadrant I and the other is in quadrant III (as opposed to one in quadrant I and the other in quadrant II), we have no need to have a partner point arrangement where we reverse the order of vectors for e.g. left staircase.
+
+We are inspired by Davoodi et al. 2012 with their concentric circles. Instead, we have half-circle for each point in a staircase; these staircases we initially assume exist in the plane. These half-circles are for left staircase the left half assuming the circle is cut along axis parallel to y axis; half-circles are for right staircase the right half assuming again that the cut is along axis parallel to y axis. For left staircase, we have half-circles s.t. their projection onto plane is a line segment and they are angled 45 degrees CCW from x axis. For right staircase, we have half-circles s.t. their projection onto plane is a line semgent and they too are angled 45 angles CCW from x axis. These half-circles lie on a cylinder angled at 45 degrees CCW from x axis and that is flat along z axis. Instead of having concentric circles, we have these half-circles s.t. a left half-circle and a right half-circle can be associated with a half-cone for left and half-cone for right s.t. these half-cones meet at their tips and they both are associated with bases that are matching full circles that form cross-sections for aforementioned cylinder. The idea is that points for same input vector component are (similar to with Davoodi et al. 2012) situated on lower left of a half-circle for A vector and situated on upper right of a half-circle for B vector. The points for same vector component (or "color") are associated with diagonals that touch the tips of the half-cones and thus are equal in length as for other colors for same A vector and B vector pair. We only have points be present if we have one bits for associated A vector or B vector.
+
+We specify for a query a 3-d hyper-rectangle range that only includes one A vector and one B vector. Some special care must be taken to make sure that we are offset enough for our range so as to contain all points for associated A and B vectors that lie on half-circles; the half-circles can be arbitrarily large. An issue with this is that because we are dealing with approximate query, similar to with Davoodi et al. 2012, points on same half-circle would have required more dimensions (which is undesirable because we already can do so given that we can use Davoodi et al. 2012 with higher dimensions, but power of poly-log term could depend on n and not be bounded by a constant) to increase ratio between shortest distance and second-shortest ("neighbor-chord-related") distance so as to have more "angle" to spend for points for same vector (for A or for B); also, we have floating-point numerical robustness issue because we have circles involved. This leads us naturally to consider approximate range closest-pair queries, which we discuss next.
+
+APPROACH #2
+
+We attempt to speed up lax Boolean matrix multiplication by reducing it to 3-d (1 + epsilon)-approximate slab range bichromatic closest-pair query. Alternatively, the algorithm also may not need to be bichromatic (i.e. it may also be called monochromatic or uncolored). The main issue is that we did not realize that Xue 2019 talks about approaches with good space and query time, but they openly admit that they do not yet have pre-processing time that is good (i.e. sub-quadratic in number of points), which we only noticed as we started looking towards the body of one of their articles.
+
+An important detail is that we scale y, but the scaling has less effect on hypotenuse/diagonal scaling unless we take into account max. x (which we also call max delta-x, which is sqrt(2) * n); we call this effect of presence of non-zero delta-x on diagonal scaling when we have delta-y scaling "muting". This we can accept even though we may have scaling of y in a way that is related to being exponential in n. We have uneven spacing along y for both staircases (while leaving them both in quadrants I and III) via us using exponential re-spacing; the staircases remain parallel to each other. Then, bits required will be quite large for y unless we opt instead to store for each power of two only the exponent; an important caveat with this is then that we require that we avoid doing arithmetic that involves y, which may or may not be an issue if we had any mentioned implementation/pre-processing advice from Xue 2019 for the approximate range closest-pair query. Also, we do not need bichromatic flavor for query either, technically -- we could just as well use uncolored flavor if we more aggressively re-space along z.
+
+We use similar point arrangement as for above-mentioned approach that uses approximate range diameter query. Instead of half-circles and a cylinder, however, we have combs and a rectangular prism. For each A vector or B vector, we have a pile of points (s.t. each corresponds to a one bit for associated vector); we note that we treat "comb" and "pile" as synonyms. We have re-spacing along z s.t. a closest pair associated with a pair of one bits has a distance that is suitably smaller than if we consider a pair of one bits s.t. one of the one bits is for an adjacent color. We note that the pile points (unlike with the half-circle points) all lie at same point when projected onto plane. A slab is more general than a 3-d hyper-rectangle in that only along x do we have finite left and right bound; for y and for z we are boundless. We select for leftmost (vertically centered) A vector and rightmost (vertically centered) B vector by rescaling y so as to make sure that no delta-x we can possibly see can make up for any unit extra delta-y (pre-re-spacing).
+
+A nice detail is that with this approach, we only have integers as components for a location; so, in that sense we avoid numerical non-robustness.
+
+It is unfortunate that Xue 2019 has no advice for implementing a data structure that has good pre-processing time that supports the aforementioned slab query (yet). A second issue is again that the approach must be s.t. we do not need to do explicit arithmetic with exponentially-large post-re-scale y values.
+
+--
+
+References
+* Davoodi et al. - Two-dimensional range diameter queries (2012)
+* Kaplan et al. - Efficient colored orthogonal range counting (2008)
+* Xue - Colored range closest-pair problem under general distance functions (2019)
+
+--
+
+
