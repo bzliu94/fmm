@@ -1,0 +1,43 @@
+2019-10-14
+
+POSTMORTEM #10
+
+We have more leads that we have abandoned.
+
+1. Range majority from Durocher et al. 2013. It turns out their definition for non-parameterized range majority query is effectively alpha-majority query with alpha set to 0.5; we would have liked alpha to effectively be zero affordably. We would have had projection of staircase pair onto x axis and have neutralizer one bits near their partners but that are more extremal by unit x value. Also, we spread points at same x to different x by scaling size by factor of n. Then, the color that appears the most we then check pair of A vector and B vector (for which we have a specific range) to see if we have a pair of matched one bits for it to determine whether for an output element we have non-zero or zero.
+
+2. 4-sided approximate range colored counting from Rahul 2015 and Aronov/Har-Peled 2008. We weight by an exponential value, multiply using epsilon of at most 0.5, un-weight by taking logarithm, round to nearest integer. Flaw with this is that detailed exponential values take too much space and thus time. Also, scaling instead of using weighting using exponential value and then un-scaling is too imprecise; the idea is to reduce an uncertainty interval to a point, but a value under threshold could have been e.g. scaled via approximation by 1 / 8 or by 1 / 1.1; for latter case, we un-scale by multiplying by 1.1 and actual answer could be under threshold and for former un-scale by multiplying by 8 and actual answer could be above threshold; we do not know the actual original value precisely enough. Also, we can make threshold value consistent for all A vector and B vector pairs; we know for approx. range colored counting the idea is to calculate union and subtract it from sum of A vector and B vector one bit counts. Then, we pad using n more colors so that one bit counts are fixed and partners are zero bits s.t. n out of the 2 * n colors contribute always zero to intersection. Rahul mentions the query being fast via his article as part of remark four. For example, log_2(2 ^ x / 1.2) for x = 9 is ~= 8.73 (s.t. (1 - epsilon) == 1 / 1.2; epsilon is 5 / 6 ~= 0.833), which we could round to nine.
+
+3. We have Gupta et al. 2008 partially-inside exact range closest-pair query for d dimensions. We set d equal to two. To make epsilon a constant, we need exponential components, which is too expensive if we need arithmetic other than comparison or min/max for these component values. In fact, this appears to be something we do because their approach uses Euclidean minimum spanning tree. So, we opt not to use their approach. We note that Xue et al. 2018 has a similar query that uses different approach (i.e. no Euclidean minimum spanning tree).
+
+4. de Berg et al. 2015 describes exact colored range counting using 2-d squares or 3-d cubes. We believe we need oblong rectangles, so we do not use their approach.
+
+5. Lai et al. 2005 describes approximate 4-sided dynamic colored range counting query. This would be enough, but their approach has a a chance of failing (i.e. it is Monte Carlo). This is because they use count-min sketch. Perhaps there is a way to derandomize CM sketch s.t. it never fails; we are not aware of any such approach and so we choose not to pursue this query.
+
+6. Nekrich describes approximate 3-sided colored range counting query. We have similar problem as with 4-sided approximate approach as from Rahul 2015 and Aronov/Har-Peled 2008 as mentioned above.
+
+7. Greve et al. 2010 give lower bound for time for 1-d range k-frequency query that takes k at query time (s.t. "frequency" is a count). Supposedly we can support query s.t. we return if a color happens exact k times in an interval or at least k times in an interval. However, they don't say how to efficiently when k > 1.
+
+8. We can arrive at O(n ^ 2.4) via Petersen 2008 (who built off of Krizanc et al. 2003). We find that epsilon of 0.4 minimizes the power in time. This comes from solving 2 * (2 - 2 * x) = 2 + x for x. We note that this assumes input 1-d array is of size O(n ^ 2).
+
+Finally, we note that range mode is hard to use weighting with efficiently when weight is in big-omega of n.
+
+--
+
+References
+
+* Durocher et al. - Range majority in constant time and linear space (2013)
+* Rahul - Approximate range counting revisited (2015)
+* Aronov and Har-Peled - On approximating the depth and related problems (2008)
+* Gupta et al. - Data structures for range-aggregate extent queries (2008)
+* Xue et al. - Approximate range closest-pair search (2018)
+* de Berg et al. - Fast computation of categorical richness on raster data sets and related problems (2015)
+* Lai et al. - Approximate range colored queries (2005)
+* Nekrich - Efficient range searching for categorical and plain data (2014)
+* Greve et al. - Cell probe lower bounds and approximations for range mode (2010)
+* Petersen - Improved bounds for range mode and range median queries (2008)
+* Krizanc et al. - Range mode and range median queries on lists and trees (2003)
+
+--
+
+
