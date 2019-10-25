@@ -24,6 +24,8 @@ A final note is that it is difficult to use negative weights; just because we co
 
 --
 
+References
+
 * de Berg and Haverkort - Significant-presence range queries in categorical data (2003)
 * El-Zein et al. - On approximate range mode and range selection (2019)
 * Rahul - Approximate range counting revisited (2015)

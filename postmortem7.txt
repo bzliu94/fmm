@@ -17,6 +17,7 @@ It's too bad that the approach is not fast enough, because it would have been qu
 --
 
 References
+
 * Gupta et al. - Data structures for range-aggregate extent queries (2008)
 * Davoodi et al. - Two-dimensional range diameter queries (2012)
 * Nekrich and Smid - Approximating range-aggregate queries using coresets (2010)

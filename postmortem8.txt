@@ -25,6 +25,7 @@ It is unfortunate that Xue 2019 has no advice for implementing a data structure 
 --
 
 References
+
 * Davoodi et al. - Two-dimensional range diameter queries (2012)
 * Kaplan et al. - Efficient colored orthogonal range counting (2008)
 * Xue - Colored range closest-pair problem under general distance functions (2019)
